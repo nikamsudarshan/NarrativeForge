@@ -1,0 +1,203 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI story gen",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "genre",
+              "placeholder": "Enter \tThe category of the story (e.g., Sci-Fi, Fantasy, Mystery, Romance).",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "settingDescription\t",
+              "placeholder": "A detailed description of the time and place (e.g., \"A neon-lit cyberpunk city in 2077\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "characterProfile",
+              "placeholder": "Details about the main character (e.g., \"An old detective haunted by his last case\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "centralConflict",
+              "placeholder": "The main problem or goal (e.g., \"Must find a stolen artifact before the city is doomed\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "plotTwist",
+              "placeholder": "An unexpected turn of events to include (e.g., \"The detective's partner is the thief\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "pacing",
+              "placeholder": "The speed of the story (e.g., \"Slow burn with a fast-paced, explosive ending\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "mood",
+              "placeholder": "The emotional feel of the story (e.g., \"Suspenseful and ominous\", \"Lighthearted and witty\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "writingStyle",
+              "placeholder": "The narrative style (e.g., \"In the style of Edgar Allan Poe\", \"Modern and cinematic\").",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "pointOfView\t",
+              "placeholder": "The perspective of the narration (e.g., \"First-person (I)\", \"Third-person omniscient\").\t",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "wordCount",
+              "placeholder": "The approximate length of the story (e.g., 500 words).\t",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "targetAudience",
+              "placeholder": "Who the story is for (e.g., \"Young Adult\", \"Mature Audience\").\t",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "keywordsToInclude",
+              "placeholder": "Specific words or phrases that must appear (e.g., \"red moon, forgotten key, whisper\").\t",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "simplePrompt",
+              "placeholder": "Have a simple story idea? Describe it here...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d0a8f1b7-8ff0-4cc1-8a0c-4d08012c2d44",
+      "name": "On form submission",
+      "webhookId": "e2c43499-2928-46de-9525-a93ba5e30d99"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "1cbbdb00-7cc1-4b64-a91e-b345b1b0e894",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HLhVrM315m1gi7E1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        400,
+        224
+      ],
+      "id": "e56bacf9-a7f7-46bc-aa7f-2c1211d9004e",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "2cdfc598-6cb0-4066-b05b-0c688004c97a",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a complete short story based on the following creative brief.\n\n## Core Idea\n* **User's Vision:** \"{{ $json.simplePrompt }}\"\n\n## Detailed Brief & Constraints\n* **Genre:** {{ $json.genre }}\n* **Setting:** {{ $json[\"settingDescription\t\"] }}\n* **Main Character:** {{ $json.characterProfile }}\n* **Central Conflict:** {{ $json.centralConflict }}\n* **Key Plot Twist:** {{ $json.plotTwist }}\n* **Pacing:**{{ $json.pacing }}\n* **Desired Mood:** {{ $json.mood }}\n* **Writing Style:** {{ $json.writingStyle }}\n* **Point of View:** {{ $json[\"pointOfView\t\"] }}\n* **Approximate Word Count:** {{ $json.wordCount }}\n* **Target Audience:** {{ $json.targetAudience }}\n* **Must Include Keywords:** {{ $json.keywordsToInclude }}\n\n**Final Instruction:** Fulfill this brief precisely. Remember your mandatory tool usage protocol for any real-world elements. Begin the story now.",
+        "options": {
+          "systemMessage": "You are a highly advanced Narrative Generation Engine. Your primary function is to act as a master author, synthesizing structured user inputs into compelling, original short stories.\n\nYour operational parameters are as follows:\n\n1.  **Strict Adherence to Constraints:** The user's prompt contains a set of binding constraints, not suggestions. You must meticulously incorporate every specified detail, including genre, mood, character profiles, setting, plot twists, point of view, and all listed keywords.\n\n2.  **Mandatory Tool Usage:** When a prompt references real-world elements (e.g., historical events, specific locations, scientific concepts, famous people), you are REQUIRED to activate your Wikipedia tool. Your objective is to research and seamlessly integrate at least two authentic, factual details to enhance the story's depth and realism.\n\n3.  **Output Purity:** Your final response must be the story and nothing else. Omit all conversational preambles (e.g., \"Here is your story...\"), summaries, or post-story analysis. The first word of your output should be the first word of the story, and the last word should be the last.\n\nYour goal is to be a precise and creative instrument for storytelling."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3d9c1851-a88d-4e04-b2b6-6032a7078d5c",
+      "name": "Story Gen AI Agent"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Story Gen AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Story Gen AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Story Gen AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Story Gen AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c86ce3754747755ec6cec29501a4403c124a9aa43e59c7f0441601884af0039d"
+  }
+}
